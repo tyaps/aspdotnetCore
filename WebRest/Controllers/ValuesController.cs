@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -37,10 +38,33 @@ namespace WebRest.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        //[HttpGet("{id1}")]
+        //public string Get(int id1)
+        //{
+        //    return "value " + id1;
+        //}
+
+        // GET api/values/some1/some2
+        [HttpGet("{v1}/{v2}")]
+        public string Get(string v1, string v2)
         {
-            return "value";
+            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+
+            return $"{v1} {v2} ip={remoteIpAddress}";
+            //return v1 + " " + v2 + remoteIpAddress;
+        }
+
+        // POST api/values/some1/some2
+        [HttpPost("{v1}/{v2}")]
+        public string Post2(string v1, string v2)
+        {
+            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+
+            var sr = new StreamReader(this.HttpContext.Request.Body);
+            var bodyText =  sr.ReadToEnd();
+
+            return $"{v1} {v2} {bodyText} ip={remoteIpAddress}";
+            //return v1 + " " + v2 + remoteIpAddress;
         }
 
         // POST api/values
@@ -58,24 +82,24 @@ namespace WebRest.Controllers
             return "value111";
         }
 
-        // GET api/values/test?id=12
-        [HttpGet("{id}")]
-        [Route("test")]
-        public string Get2(int id)
-        {
-            // return "value";
-            var product = new Test() { v1 = "vvv", v2 = id };
-            Debug.WriteLine("ccc::" + JsonConvert.SerializeObject(product));
-            return JsonConvert.SerializeObject(product);
-        }
+        //// GET api/values/test?id=12
+        //[HttpGet("{id}")]
+        //[Route("test")]
+        //public string Get2(int id)
+        //{
+        //    // return "value";
+        //    var product = new Test() { v1 = "vvv", v2 = id };
+        //    Debug.WriteLine("ccc::" + JsonConvert.SerializeObject(product));
+        //    return JsonConvert.SerializeObject(product);
+        //}
 
-        [Route("test3")]
-        public JsonResult Get3()
-        {
-            var product = new Test() { v1 = "vvv", v2 = 888 };
-            //return JsonConvert.SerializeObject(product);
-            return Json(product);
-        }
+        //[Route("test3")]
+        //public JsonResult Get3()
+        //{
+        //    var product = new Test() { v1 = "vvv", v2 = 888 };
+        //    //return JsonConvert.SerializeObject(product);
+        //    return Json(product);
+        //}
 
         // PUT api/values/5
         [HttpPut("{id}")]
