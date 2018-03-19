@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -55,16 +57,64 @@ namespace WebRest.Controllers
         }
 
         // POST api/values/some1/some2
+        //[HttpPost("{v1}/{v2}")]
+        //public string Post2(string v1, string v2)
+        //{
+        //    var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+
+        //    var sr = new StreamReader(this.HttpContext.Request.Body);
+        //    var bodyText =  sr.ReadToEnd();
+
+
+
+        //    return $"{v1} {v2} {bodyText} ip={remoteIpAddress}";
+        //    //return v1 + " " + v2 + remoteIpAddress;
+        //}
+
         [HttpPost("{v1}/{v2}")]
-        public string Post2(string v1, string v2)
+        public string SendMessageToTelegram(string v1, string v2)
         {
             var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
 
             var sr = new StreamReader(this.HttpContext.Request.Body);
-            var bodyText =  sr.ReadToEnd();
+            var bodyText = sr.ReadToEnd();
 
-            return $"{v1} {v2} {bodyText} ip={remoteIpAddress}";
+            var chat_id = "-283790948"; //чтоб узнать chat_id нужно послать в группу, где бот уже добавлен /my_id @ARND_Bot и сделать getUpdates
+            var message = "hello from Monitoribg bot";
+
+            var httpClient = new HttpClient();
+            
+            var json = $"{{\"chat_id\": \"{chat_id}\", \"text\": \"{message}\"}}";
+            var botToken = "587320199:AAH2BiKD5t591o4W1z-r5QjSSlbzaZEDzGQ";
+
+            var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
+            var task = GetData(url, json);
+            task.Wait();
+            var res = task.Result;
+
+            //curl -X POST "https://api.telegram.org/bot587320199:AAH2BiKD5t591o4W1z-r5QjSSlbzaZEDzGQ/sendMessage" -d "chat_id=-283790948&text=my sample text"
+
+            //StringContent js = new StringContent(json);
+
+            //httpClient.PostAsync("http://so", js);
+
+
+            return $"{v1} {v2} {bodyText} ip={remoteIpAddress} result={res}";
             //return v1 + " " + v2 + remoteIpAddress;
+        }
+
+        private async Task<string> GetData(string url, string data)
+        {
+            HttpClient client = new HttpClient();
+            StringContent queryString = new StringContent(data, Encoding.UTF8,  "application/json");
+
+            HttpResponseMessage response = await client.PostAsync(new Uri(url), queryString);
+
+            //response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            return responseBody;
         }
 
         // POST api/values
