@@ -96,7 +96,7 @@ namespace WebRest.Controllers
 
             //StringContent js = new StringContent(json);
 
-            //httpClient.PostAsync("http://so", js);
+            //httpClient.PostAsync("http://so", js);ss
 
 
             return $"{v1} {v2} {bodyText} ip={remoteIpAddress} result={res}";
